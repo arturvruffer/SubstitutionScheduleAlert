@@ -1,16 +1,30 @@
-# This is a sample Python script.
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from time import sleep
+import config
 
-# Press Umschalt+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+driver = webdriver.Firefox(executable_path=r"C:\Users\Artur\Documents\Programmieren\geckodriver.exe")
+driver.get("https://gym-old.eu/iserv/infodisplay/show/1")
+sleep(1)
 
+#todo Puts the page into full screen
+# page = driver.find_element_by_name("_username")
+# page.send_keys(Keys.F11)
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Strg+F8 to toggle the breakpoint.
+#Finds and fills the username form
+username_form = driver.find_element_by_name("_username")
+username_form.clear()
+username_form.send_keys(config.username)
 
+#Finds and fills the password form
+password_form = driver.find_element_by_name("_password")
+password_form.clear()
+password_form.send_keys(config.password)
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+#Clicks the login button
+login_button = driver.find_element_by_xpath("/html/body/div/div[2]/div/div/div[2]/form/div[3]/div[1]/button")
+login_button.click()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+#todo Screenshots the page (Screenshot too small to read)
+driver.get_screenshot_as_file("screenshot.png")
+
