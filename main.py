@@ -55,7 +55,7 @@ def send_email():
     time_string = today.strftime("%H:%M Uhr")
     # Defining variables used to send the email (Recipients, content etc.)
     sent_from = config.gmail_username
-    send_to = config.gmail_username
+    send_to = config.mailing_list
     email_subject = "Vertretungsplan vom " + date_string
     email_message = "Im Anhang der heutige Vertretungsplan.\n(Stand: " + time_string + ")"
     file_location = "C:\\Users\\Artur\\Documents\\Programmieren\\SubstitutionScheduleAlert\\screenshot.png"
@@ -63,7 +63,7 @@ def send_email():
     # Constructing the email as MIME object
     msg = MIMEMultipart()
     msg["From"] = sent_from
-    msg["To"] = send_to
+    msg["To"] = ", ".join(send_to)
     msg["Subject"] = email_subject
 
     msg.attach(MIMEText (email_message, "plain"))
