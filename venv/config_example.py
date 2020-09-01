@@ -1,4 +1,7 @@
 #Set username and password
 
-username = "username"
-password = "password"
+iserv_username = "username"
+iserv_password = "password"
+
+gmail_username = "username"
+gmail_password = "password"
