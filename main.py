@@ -9,17 +9,27 @@ from email.mime.base import MIMEBase
 from email import encoders
 import os.path
 from datetime import datetime
+from bs4 import BeautifulSoup
+# import schedule_scraper
 
 
 def get_and_send_substitution_schedule():
-    login()
-    get_screenshot()
-    send_email()
+    # source_code = login_and_get_source_code()
+    #
+    # # Temporary! Saves html file of website
+    # html_file = open("html.html", "w+")
+    # html_file.write(source_code)
+    # html_file.close()
+
+    html_to_csv()  # todo Pass "source_code" into function
+    # get_screenshot()
+    # send_email()
 
 
 # Logs into the IServ website to view the schedule
-def login():
+def login_and_get_source_code():
     global driver
+    global html
     driver = webdriver.Firefox(executable_path=r"C:\Users\Artur\Documents\Programmieren\geckodriver.exe")
     driver.get("https://gym-old.eu/iserv/infodisplay/show/1")
     sleep(1)
@@ -39,6 +49,14 @@ def login():
     # Clicks the login button
     login_button = driver.find_element_by_xpath("/html/body/div/div[2]/div/div/div[2]/form/div[3]/div[1]/button")
     login_button.click()
+
+    # Switch frame to iframe to access elements in substitution monitor
+    iframe = driver.find_element_by_xpath("/html/body/div/div[2]/div[3]/div[2]/div/div/div/div/div[2]/div/div/div/iframe")
+    driver.switch_to.frame(iframe)
+    # Returns the source code of the page inside the iframe
+    source_code = driver.page_source
+    #todo Might not work when both days are filled (because of find by xpath)
+    return source_code
 
 
 # Saving the whole browser page as screenshot in directory
@@ -90,5 +108,24 @@ def send_email():
     print("Email successfully sent!")
 
 
-get_and_send_substitution_schedule()
+def html_to_csv(): # todo Add "source_code" as argument
+    with open("html.html") as source_code:
+        soup = BeautifulSoup(source_code, "lxml")
 
+    # Find the relevant dividers corresponding to the two tables which are the schedule
+    today_and_tomorrow = soup.find_all("div", class_= "grupet_widget_ScrollableTable grupet_widget_AutoScrollingTable")
+
+    # Loops over the two separate tables of schedule and prints lines of table grouped together
+    for count, day in enumerate(today_and_tomorrow):
+        print("DAY " + str(count+1) + "\n\n")
+
+        for num_of_cell, cell in enumerate(day.tbody.find_all("td"), start = 1):
+            if cell.text == "":
+                print("NO CONTENT")
+            else: print(cell.text)
+
+            if num_of_cell % 8 == 0:  # Formatting extracted contents for improved readability
+                print("\n")
+
+
+get_and_send_substitution_schedule()
