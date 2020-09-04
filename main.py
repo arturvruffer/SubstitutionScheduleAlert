@@ -14,15 +14,18 @@ from bs4 import BeautifulSoup
 
 
 def get_and_send_substitution_schedule():
-    # source_code = login_and_get_source_code()
-    #
-    # # Temporary! Saves html file of website
-    # html_file = open("html.html", "w+")
-    # html_file.write(source_code)
-    # html_file.close()
+    source_code = login_and_get_source_code()
 
-    html_to_csv()  # todo Pass "source_code" into function
+    # Saves html file of website
+    file_path = r"C:\Users\Artur\Documents\Programmieren\SubstitutionScheduleAlert\html\\" + datetime.now().strftime("%d_%m_%Y_%H_%M_%S") + ".html"
+
+    html_file = open(file_path, "w+")
+    html_file.write(source_code)
+    html_file.close()
+
+    html_to_csv(file_path)  # todo Pass "file_path" into function
     # get_screenshot()
+    driver.close()
     # send_email()
 
 
@@ -55,14 +58,13 @@ def login_and_get_source_code():
     driver.switch_to.frame(iframe)
     # Returns the source code of the page inside the iframe
     source_code = driver.page_source
-    #todo Might not work when both days are filled (because of find by xpath)
+
     return source_code
 
 
 # Saving the whole browser page as screenshot in directory
 def get_screenshot():
     driver.get_screenshot_as_file("screenshot.png")
-    driver.close()
 
 
 # Send the screenshot as an attachment in an email using gmail
@@ -71,6 +73,7 @@ def send_email():
     today = datetime.now()
     date_string = today.strftime("%d.%m.%Y")
     time_string = today.strftime("%H:%M Uhr")
+
     # Defining variables used to send the email (Recipients, content etc.)
     sent_from = config.gmail_username
     send_to = config.mailing_list
@@ -108,24 +111,44 @@ def send_email():
     print("Email successfully sent!")
 
 
-def html_to_csv(): # todo Add "source_code" as argument
-    with open("html.html") as source_code:
+def html_to_csv(file_path):  # todo Add "filename" as argument
+    with open(file_path) as source_code:
         soup = BeautifulSoup(source_code, "lxml")
 
     # Find the relevant dividers corresponding to the two tables which are the schedule
-    today_and_tomorrow = soup.find_all("div", class_= "grupet_widget_ScrollableTable grupet_widget_AutoScrollingTable")
+    today_and_tomorrow = soup.find_all("div", class_="grupet_widget_ScrollableTable grupet_widget_AutoScrollingTable")
+
+    # Create empty list containing both days
+    substitution_list = \
+        [
+            [], []  # [today], [tomorrow] Each line in table of one day is a list
+        ]
 
     # Loops over the two separate tables of schedule and prints lines of table grouped together
-    for count, day in enumerate(today_and_tomorrow):
-        print("DAY " + str(count+1) + "\n\n")
+    for num_of_day, day in enumerate(today_and_tomorrow):
+        # print("DAY " + str(num_of_day+1) + "\n\n")
 
-        for num_of_cell, cell in enumerate(day.tbody.find_all("td"), start = 1):
-            if cell.text == "":
-                print("NO CONTENT")
-            else: print(cell.text)
+        try:
+            for num_of_cell, cell in enumerate(day.tbody.find_all("td"), start=1):
+                num_of_lines = 0
+                if num_of_lines == 0:
+                    substitution_list[num_of_day].append([])
 
-            if num_of_cell % 8 == 0:  # Formatting extracted contents for improved readability
-                print("\n")
+                if cell.text == "":
+                    # print("NO CONTENT")
+                    substitution_list[num_of_day][num_of_lines].append("No content")
+                else:
+                    # print(cell.text)
+                    substitution_list[num_of_day][num_of_lines].append(cell.text)
+
+                if num_of_cell % 8 == 0:  # Formatting extracted contents for improved readability
+                    # print("\n")
+                    num_of_lines += 1
+
+        except AttributeError:
+            pass
+
+    print(substitution_list)
 
 
 get_and_send_substitution_schedule()
