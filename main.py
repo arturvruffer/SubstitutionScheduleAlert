@@ -147,6 +147,7 @@ def html_to_csv(file_path):  # todo Add "filename" as argument
 
         except AttributeError:
             pass
+    # todo Convert substitution list to csv file
 
     print(substitution_list)
 
