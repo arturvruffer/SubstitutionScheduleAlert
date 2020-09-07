@@ -10,7 +10,7 @@ from email import encoders
 import os.path
 from datetime import datetime
 from bs4 import BeautifulSoup
-# import schedule_scraper
+import csv
 
 
 def get_and_send_substitution_schedule():
@@ -18,12 +18,13 @@ def get_and_send_substitution_schedule():
 
     # Saves html file of website
     file_path = r"C:\Users\Artur\Documents\Programmieren\SubstitutionScheduleAlert\html\\" + datetime.now().strftime("%d_%m_%Y_%H_%M_%S") + ".html"
+    file_path_csv = r"C:\Users\Artur\Documents\Programmieren\SubstitutionScheduleAlert\csv\\" + datetime.now().strftime("%d_%m_%Y_%H_%M_%S") + ".csv"
 
     html_file = open(file_path, "w+")
     html_file.write(source_code)
     html_file.close()
 
-    html_to_csv(file_path)  # todo Pass "file_path" into function
+    html_to_csv(file_path, file_path_csv)  # todo Pass "file_path" into function
     # get_screenshot()
     driver.close()
     # send_email()
@@ -33,7 +34,7 @@ def get_and_send_substitution_schedule():
 def login_and_get_source_code():
     global driver
     global html
-    driver = webdriver.Firefox(executable_path=r"C:\Users\Artur\Documents\Programmieren\geckodriver.exe")
+    driver = webdriver.Firefox(executable_path=config.geckodriver_path)
     driver.get("https://gym-old.eu/iserv/infodisplay/show/1")
     sleep(1)
 
@@ -111,7 +112,7 @@ def send_email():
     print("Email successfully sent!")
 
 
-def html_to_csv(file_path):  # todo Add "filename" as argument
+def html_to_csv(file_path, file_path_csv):  # todo Add "filename" as argument
     with open(file_path) as source_code:
         soup = BeautifulSoup(source_code, "lxml")
 
@@ -121,17 +122,16 @@ def html_to_csv(file_path):  # todo Add "filename" as argument
     # Create empty list containing both days
     substitution_list = \
         [
-            [], []  # [today], [tomorrow] Each line in table of one day is a list
+            [], []  # [today], [tomorrow] Each line in table of one day is a list of lines of table
         ]
 
     # Loops over the two separate tables of schedule and prints lines of table grouped together
     for num_of_day, day in enumerate(today_and_tomorrow):
         # print("DAY " + str(num_of_day+1) + "\n\n")
-
+        num_of_lines = 0
         try:
-            for num_of_cell, cell in enumerate(day.tbody.find_all("td"), start=1):
-                num_of_lines = 0
-                if num_of_lines == 0:
+            for num_of_cells, cell in enumerate(day.tbody.find_all("td"), start=1):
+                if num_of_cells == 1 or num_of_cells % 8 == 0:
                     substitution_list[num_of_day].append([])
 
                 if cell.text == "":
@@ -141,15 +141,24 @@ def html_to_csv(file_path):  # todo Add "filename" as argument
                     # print(cell.text)
                     substitution_list[num_of_day][num_of_lines].append(cell.text)
 
-                if num_of_cell % 8 == 0:  # Formatting extracted contents for improved readability
+                if num_of_cells != 1 and num_of_cells % 8 == 0:  # Formatting extracted contents for improved readability
                     # print("\n")
                     num_of_lines += 1
 
         except AttributeError:
             pass
-    # todo Convert substitution list to csv file
 
     print(substitution_list)
+
+    # todo Convert substitution list to csv file
+
+    with open(file_path_csv, "w+", newline="") as csv_file:
+        thewriter = csv.writer(csv_file)
+
+        for num_of_day, day in enumerate(substitution_list):
+            for num_of_line, line in enumerate(day):
+                thewriter.writerow(line)
+
 
 
 get_and_send_substitution_schedule()
