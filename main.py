@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.keys import Keys
 from time import sleep
 import config
@@ -40,7 +41,10 @@ def get_and_send_substitution_schedule():
 def login_and_get_source_code():
     global driver
     global html
-    driver = webdriver.Firefox(executable_path=config.geckodriver_path)
+
+    options = Options()
+    options.headless = config.run_headless
+    driver = webdriver.Firefox(options=options, executable_path=config.geckodriver_path)
     driver.get("https://gym-old.eu/iserv/infodisplay/show/1")
     sleep(1)
 
