@@ -24,10 +24,16 @@ def get_and_send_substitution_schedule():
     html_file.write(source_code)
     html_file.close()
 
-    html_to_csv(file_path, file_path_csv)  # todo Pass "file_path" into function
+    substitution_list = html_to_csv(file_path, file_path_csv)  # todo Pass "file_path" into function
     # get_screenshot()
     driver.close()
     # send_email()
+
+    output_subs(substitution_list, "6a")
+    output_subs(substitution_list, "7b")
+    output_subs(substitution_list, "11")
+    output_subs(substitution_list, "13")
+    output_subs(substitution_list, "9")
 
 
 # Logs into the IServ website to view the schedule
@@ -148,8 +154,6 @@ def html_to_csv(file_path, file_path_csv):  # todo Add "filename" as argument
         except AttributeError:
             pass
 
-    print(substitution_list)
-
     # todo Convert substitution list to csv file
 
     with open(file_path_csv, "w+", newline="") as csv_file:
@@ -159,6 +163,28 @@ def html_to_csv(file_path, file_path_csv):  # todo Add "filename" as argument
             for num_of_line, line in enumerate(day):
                 thewriter.writerow(line)
 
+    return substitution_list
+
+
+def output_subs(substitution_list, school_class):
+    no_substitutions = True
+    output_substitution_list = []
+    for num_of_day, day in enumerate(substitution_list):
+        for num_of_line, line in enumerate(day):
+            try:
+                if school_class in line[2]:
+                    output_substitution_list.append(line)
+                    no_substitutions = False
+            except:
+                pass
+
+    if no_substitutions:
+        print("Keine Vertretung für die", school_class)
+    else:
+        print("Vertretungen für die {}:".format(school_class))
+        for substitution in output_substitution_list:
+            print(substitution)
+    print("")
 
 
 get_and_send_substitution_schedule()
