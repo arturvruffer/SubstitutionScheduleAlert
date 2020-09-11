@@ -30,11 +30,8 @@ def get_and_send_substitution_schedule():
     driver.close()
     # send_email()
 
-    output_subs(substitution_list, "6a")
-    output_subs(substitution_list, "7b")
+    output_subs(substitution_list, "10b")
     output_subs(substitution_list, "11")
-    output_subs(substitution_list, "13")
-    output_subs(substitution_list, "9")
 
 
 # Logs into the IServ website to view the schedule
