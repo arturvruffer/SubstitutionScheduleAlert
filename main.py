@@ -18,8 +18,8 @@ def get_and_send_substitution_schedule():
     source_code = login_and_get_source_code()
 
     # Saves html file of website
-    file_path = r"C:\Users\Artur\Documents\Programmieren\SubstitutionScheduleAlert\html\\" + datetime.now().strftime("%d_%m_%Y_%H_%M_%S") + ".html"
-    file_path_csv = r"C:\Users\Artur\Documents\Programmieren\SubstitutionScheduleAlert\csv\\" + datetime.now().strftime("%d_%m_%Y_%H_%M_%S") + ".csv"
+    file_path = config.html_folder_path + datetime.now().strftime("%d_%m_%Y_%H_%M_%S") + ".html"
+    file_path_csv = config.csv_folder_path + datetime.now().strftime("%d_%m_%Y_%H_%M_%S") + ".csv"
 
     html_file = open(file_path, "w+")
     html_file.write(source_code)
@@ -30,11 +30,11 @@ def get_and_send_substitution_schedule():
     driver.close()
     # send_email()
 
-    output_subs(substitution_list, "6a")
-    output_subs(substitution_list, "7b")
-    output_subs(substitution_list, "11")
-    output_subs(substitution_list, "13")
-    output_subs(substitution_list, "9")
+    # output_subs(substitution_list, "6a")
+    # output_subs(substitution_list, "7b")
+    # output_subs(substitution_list, "11")
+    # output_subs(substitution_list, "13")
+    output_subs(substitution_list, "12z")
 
 
 # Logs into the IServ website to view the schedule
@@ -173,7 +173,14 @@ def html_to_csv(file_path, file_path_csv):  # todo Add "filename" as argument
 def output_subs(substitution_list, school_class):
     no_substitutions = True
     output_substitution_list = []
+    cancellation_string = "{which_day} Ausfall für die {form}: \n{lesson}. Stunde ({time}) \nFach: {subject}, Raum: {room}\n{text}"
     for num_of_day, day in enumerate(substitution_list):
+
+        if num_of_day == 0:
+            day_string = "Heute"
+        else:
+            day_string = "Morgen"
+
         for num_of_line, line in enumerate(day):
             try:
                 if school_class in line[2]:
@@ -187,7 +194,12 @@ def output_subs(substitution_list, school_class):
     else:
         print("Vertretungen für die {}:".format(school_class))
         for substitution in output_substitution_list:
-            print(substitution)
+            if "---" in substitution[5] or "Entfall" in substitution[6]:  # Tests if lesson is cancelled
+                print(cancellation_string.format(which_day=day_string, form=substitution[2],
+                                                 lesson=substitution[0], time=substitution[1],
+                                                 subject=substitution[3], room=substitution[4]))
+            else:
+                print("Vertretung")
     print("")
 
 
