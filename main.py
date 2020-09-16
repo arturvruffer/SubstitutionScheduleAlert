@@ -33,8 +33,8 @@ def get_and_send_substitution_schedule():
     # output_subs(substitution_list, "6a")
     # output_subs(substitution_list, "7b")
     # output_subs(substitution_list, "11")
-    # output_subs(substitution_list, "13")
     output_subs(substitution_list, "12z")
+    # todo Create list in config to configure classes that have to be checked
 
 
 # Logs into the IServ website to view the schedule
@@ -158,8 +158,6 @@ def html_to_csv(file_path, file_path_csv):  # todo Add "filename" as argument
         except AttributeError:
             pass
 
-    # todo Convert substitution list to csv file
-
     with open(file_path_csv, "w+", newline="") as csv_file:
         thewriter = csv.writer(csv_file)
 
@@ -189,18 +187,27 @@ def output_subs(substitution_list, school_class):
             except:
                 pass
 
+    # print(output_substitution_list)
+
     if no_substitutions:
-        print("Keine Vertretung für die", school_class)
+        print("Keine Vertretung für die", school_class, "\n")
     else:
-        print("Vertretungen für die {}:".format(school_class))
+        print("Vertretungen für die {}:".format(school_class), "\n")
         for substitution in output_substitution_list:
+
+            # Distinguishes between substitution and cancellation
             if "---" in substitution[5] or "Entfall" in substitution[6]:  # Tests if lesson is cancelled
+                # print(substitution[2])
                 print(cancellation_string.format(which_day=day_string, form=substitution[2],
                                                  lesson=substitution[0], time=substitution[1],
-                                                 subject=substitution[3], room=substitution[4]))
+                                                 subject=substitution[3], room=substitution[4],
+                                                 text=substitution[7]))
             else:
                 print("Vertretung")
-    print("")
+                # todo Finish substitution output
+            print("")
 
+    print("-----------------------------------")
+# todo Format outputs as a string that can be send via email
 
 get_and_send_substitution_schedule()
